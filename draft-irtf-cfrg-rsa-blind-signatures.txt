@@ -5,10 +5,10 @@
 Network Working Group                                           F. Denis
 Internet-Draft                                               Fastly Inc.
 Intended status: Informational                                 F. Jacobs
-Expires: 3 August 2023                                        Apple Inc.
+Expires: 5 August 2023                                        Apple Inc.
                                                               C. A. Wood
                                                               Cloudflare
-                                                         30 January 2023
+                                                         1 February 2023
 
 
                           RSA Blind Signatures
@@ -46,7 +46,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 3 August 2023.
+   This Internet-Draft will expire on 5 August 2023.
 
 Copyright Notice
 
@@ -132,7 +132,7 @@ Table of Contents
    verified with a standard RSA-PSS library.
 
    This document represents the consensus of the Crypto Forum Research
-   Group (CFRG).
+   Group (CFRG).  It is not an IETF product and is not a standard.
 
 2.  Requirements Notation
 
