@@ -1046,7 +1046,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Denis, et al.</td>
-<td class="center">Expires 14 August 2023</td>
+<td class="center">Expires 19 August 2023</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1059,12 +1059,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-irtf-cfrg-rsa-blind-signatures-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2023-02-10" class="published">10 February 2023</time>
+<time datetime="2023-02-15" class="published">15 February 2023</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2023-08-14">14 August 2023</time></dd>
+<dd class="expires"><time datetime="2023-08-19">19 August 2023</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1117,7 +1117,7 @@ protocol can be verified as an RSA-PSS signature.<a href="#section-abstract-1" c
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 14 August 2023.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 19 August 2023.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1317,7 +1317,7 @@ between M inclusive and N exclusive, i.e., M &lt;= R &lt; N.<a href="#section-3-
 </li>
         <li class="normal" id="section-3-2.4">inverse_mod(x, n): Compute the multiplicative inverse of x mod n or fail if x and n are not co-prime.<a href="#section-3-2.4" class="pilcrow">¶</a>
 </li>
-        <li class="normal" id="section-3-2.5">is_coprime(x, n): Determines whether x and n are co-prime.<a href="#section-3-2.5" class="pilcrow">¶</a>
+        <li class="normal" id="section-3-2.5">is_coprime(x, n): Return true if x and n are co-prime, and false otherwise.<a href="#section-3-2.5" class="pilcrow">¶</a>
 </li>
         <li class="normal" id="section-3-2.6">len(s): The length of a byte string, in bytes.<a href="#section-3-2.6" class="pilcrow">¶</a>
 </li>
@@ -1438,9 +1438,12 @@ Steps:
 key. It outputs the blinded message to be sent to the server, encoded as a byte string,
 and the corresponding inverse, an integer. RSAVP1 and EMSA-PSS-ENCODE are as defined in
 Sections <a href="https://rfc-editor.org/rfc/rfc8017#section-5.2.2" class="relref">5.2.2</a> and <a href="https://rfc-editor.org/rfc/rfc8017#section-9.1.1" class="relref">9.1.1</a> of <span>[<a href="#RFC8017" class="cite xref">RFC8017</a>]</span>, respectively.<a href="#section-4.2-1" class="pilcrow">¶</a></p>
-<p id="section-4.2-2">If this function fails with an "invalid blind" error, implementations SHOULD retry
+<p id="section-4.2-2">If this function fails with an "blinding error" error, implementations SHOULD retry
 the function again. The probability of one or more such errors in sequence is negligible.
-See <a href="#errors" class="auto internal xref">Section 6.1</a> for more information about dealing with such errors.<a href="#section-4.2-2" class="pilcrow">¶</a></p>
+This function can also fail with an "invalid input" error, which indicates that one of
+the inputs (likely the public key) was invalid. Implementations SHOULD update the public
+key before calling this function again. See <a href="#errors" class="auto internal xref">Section 6.1</a> for more information about
+dealing with such errors.<a href="#section-4.2-2" class="pilcrow">¶</a></p>
 <p id="section-4.2-3">Note that this function invokes RSAVP1, which is defined to throw an optional error
 for invalid inputs. However, this error cannot occur based on how RSAVP1 is invoked,
 so this error is not included in the list of errors for Blind.<a href="#section-4.2-3" class="pilcrow">¶</a></p>
@@ -1465,8 +1468,8 @@ Outputs:
 Errors:
 - "message too long": Raised when the input message is too long (raised by EMSA-PSS-ENCODE).
 - "encoding error": Raised when the input message fails encoding (raised by EMSA-PSS-ENCODE).
-- "invalid blind": Raised when the inverse of r cannot be found.
-- "invalid message": Raised when the message would not be co-prime with n.
+- "blinding error": Raised when the inverse of r cannot be found.
+- "invalid input": Raised when the message is not be co-prime with n.
 
 Steps:
 1. encoded_msg = EMSA-PSS-ENCODE(msg, bit_len(n))
@@ -1474,11 +1477,11 @@ Steps:
 2. If EMSA-PSS-ENCODE raises an error, raise the error and stop
 3. m = bytes_to_int(encoded_msg)
 4. c = is_coprime(m, n)
-5. If c is true, raise an "invalid message" error
+5. If c is true, raise an "invalid input" error
    and stop
 6. r = random_integer_uniform(1, n)
 7. inv = inverse_mod(r, n)
-8. If inverse_mod fails, raise an "invalid blind" error
+8. If inverse_mod fails, raise an "blinding error" error
    and stop
 9. x = RSAVP1(pkS, r)
 10. z = m * x mod n
@@ -1661,8 +1664,8 @@ These errors are meant as a guide for implementors. They are not an exhaustive l
 the errors an implementation might emit. For example, implementations might run out of memory.<a href="#section-6.1-1" class="pilcrow">¶</a></p>
 <p id="section-6.1-2">Moreover, implementations can handle errors as needed or desired. Where applicable, this document
 provides guidance for how to deal with explicit errors that are generated in the protocol. For
-example, the "invalid blind" error that is generated in Blind occurs when the client generates
-a prime factor of the server's public key. <a href="#blind" class="auto internal xref">Section 4.2</a> indicates that implementations SHOULD
+example, "blinding error" is generated in Blind when the client produces a prime factor of
+the server's public key. <a href="#blind" class="auto internal xref">Section 4.2</a> indicates that implementations SHOULD
 retry the Blind function when this error occurs, but an implementation could also handle this
 exceptional event differently, e.g., by informing the server that the key has been factored.<a href="#section-6.1-2" class="pilcrow">¶</a></p>
 </section>
