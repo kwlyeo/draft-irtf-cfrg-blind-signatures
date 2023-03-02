@@ -14,12 +14,12 @@ introduced by Chaum for untraceable payments. A signature that is output from th
 protocol can be verified as an RSA-PSS signature. 
        This document is a product of the Crypto Forum Research Group (CFRG) in the IRTF. 
     " name="description">
-<meta content="xml2rfc 3.15.3" name="generator">
+<meta content="xml2rfc 3.16.0" name="generator">
 <meta content="Internet-Draft" name="keyword">
 <meta content="draft-irtf-cfrg-rsa-blind-signatures-latest" name="ietf.draft">
 <!-- Generator version information:
-  xml2rfc 3.15.3
-    Python 3.10.9
+  xml2rfc 3.16.0
+    Python 3.10.10
     appdirs 1.4.4
     ConfigArgParse 1.5.3
     google-i18n-address 2.5.2
@@ -364,7 +364,7 @@ ul.empty li, .ulEmpty li {
   margin-top: 0.5em;
 }
 :is(ul, ol).compact, .ulCompact, .olCompact {
-  line-height: 100%;
+  line-height: 1;
   margin: 0 0 0 2em;
 }
 
@@ -374,9 +374,12 @@ dl {
   --indent: 3ch;
   /* --indent: attr(indent ch); not supported in any browser, but we can dream */
 }
+dl.olPercent {
+  --indent: 5ch;
+}
 dl > dt {
   float: left;
-  margin-right: 1em;
+  margin-right: 2ch;
   min-width: 8ch;
 }
 dl.dlNewline > dt {
@@ -386,6 +389,9 @@ dl > dd {
   margin-bottom: .8em;
   margin-left: var(--indent) !important; /* stupid element overrides */
   min-height: 2ex;
+}
+dl.olPercent > dt {
+  min-width: calc(var(--indent) - 2ch);
 }
 :is(dl.compact, .dlCompact) > dd {
   margin-bottom: 0;
@@ -586,10 +592,14 @@ hr {
 .bcp14 {
   font-variant: small-caps;
   font-weight: 600;
-  font-size: 14.5px;
+  font-size: var(--small-font-size);
 }
 .role {
   font-variant: all-small-caps;
+}
+sub, sup {
+  line-height: 1;
+  font-size: 80%;
 }
 
 /* info block */
@@ -1042,11 +1052,11 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <thead><tr>
 <td class="left">Internet-Draft</td>
 <td class="center">RSA Blind Signatures</td>
-<td class="right">January 2023</td>
+<td class="right">March 2023</td>
 </tr></thead>
 <tfoot><tr>
 <td class="left">Denis, et al.</td>
-<td class="center">Expires 3 August 2023</td>
+<td class="center">Expires 3 September 2023</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1059,12 +1069,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-irtf-cfrg-rsa-blind-signatures-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2023-01-30" class="published">30 January 2023</time>
+<time datetime="2023-03-02" class="published">2 March 2023</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2023-08-03">3 August 2023</time></dd>
+<dd class="expires"><time datetime="2023-09-03">3 September 2023</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1117,7 +1127,7 @@ protocol can be verified as an RSA-PSS signature.<a href="#section-abstract-1" c
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 3 August 2023.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 3 September 2023.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1277,11 +1287,12 @@ on the key is doubled compared to a scheme where only the public key is required
 require access to the private key for verification. Moreover, <span>[<a href="#JKK14" class="cite xref">JKK14</a>]</span> shows that one can realize
 a VOPRF in the Random Oracle Model by hashing a signature-message pair, where the signature is
 computed using a deterministic blind signature protocol.<a href="#section-1-3" class="pilcrow">¶</a></p>
-<p id="section-1-4">This document specifies a protocol for computing the RSA blind signatures using RSA-PSS encoding,
-and a family of variants for this protocol, denoted RSABSSA. In order to facilitate deployment,
-it is defined in such a way that the resulting (unblinded) signature can be verified with a standard
-RSA-PSS library.<a href="#section-1-4" class="pilcrow">¶</a></p>
-<p id="section-1-5">This document represents the consensus of the Crypto Forum Research Group (CFRG).<a href="#section-1-5" class="pilcrow">¶</a></p>
+<p id="section-1-4">This document specifies a protocol for computing RSA blind signatures using RSA-PSS encoding,
+and a family of variants for this protocol, denoted RSABSSA (RSA Blind Signature with Appendix).
+In order to facilitate deployment, it is defined in such a way that the resulting (unblinded)
+signature can be verified with a standard RSA-PSS library.<a href="#section-1-4" class="pilcrow">¶</a></p>
+<p id="section-1-5">This document represents the consensus of the Crypto Forum Research Group (CFRG). It is
+not an IETF product and is not a standard.<a href="#section-1-5" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="requirements-notation">
@@ -1316,15 +1327,17 @@ between M inclusive and N exclusive, i.e., M &lt;= R &lt; N.<a href="#section-3-
 </li>
         <li class="normal" id="section-3-2.4">inverse_mod(x, n): Compute the multiplicative inverse of x mod n or fail if x and n are not co-prime.<a href="#section-3-2.4" class="pilcrow">¶</a>
 </li>
-        <li class="normal" id="section-3-2.5">len(s): The length of a byte string, in bytes.<a href="#section-3-2.5" class="pilcrow">¶</a>
+        <li class="normal" id="section-3-2.5">is_coprime(x, n): Return true if x and n are co-prime, and false otherwise.<a href="#section-3-2.5" class="pilcrow">¶</a>
 </li>
-        <li class="normal" id="section-3-2.6">random(n): Generate n random bytes using a cryptographically-secure random number generator.<a href="#section-3-2.6" class="pilcrow">¶</a>
+        <li class="normal" id="section-3-2.6">len(s): The length of a byte string, in bytes.<a href="#section-3-2.6" class="pilcrow">¶</a>
 </li>
-        <li class="normal" id="section-3-2.7">concat(x0, ..., xN): Concatenation of byte strings. For example,
-concat(0x01, 0x0203, 0x040506) = 0x010203040506.<a href="#section-3-2.7" class="pilcrow">¶</a>
+        <li class="normal" id="section-3-2.7">random(n): Generate n random bytes using a cryptographically-secure random number generator.<a href="#section-3-2.7" class="pilcrow">¶</a>
 </li>
-        <li class="normal" id="section-3-2.8">slice(x, i, j): Return bytes in the byte string <code>x</code> starting from offset <code>i</code> and ending at
-offset <code>j</code>, inclusive. For example, slice(0x010203040506, 1, 5) = 0x0203040506.<a href="#section-3-2.8" class="pilcrow">¶</a>
+        <li class="normal" id="section-3-2.8">concat(x0, ..., xN): Concatenation of byte strings. For example,
+concat(0x01, 0x0203, 0x040506) = 0x010203040506.<a href="#section-3-2.8" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-3-2.9">slice(x, i, j): Return bytes in the byte string <code>x</code> starting from offset <code>i</code> and ending at
+offset <code>j</code>, inclusive. For example, slice(0x010203040506, 1, 5) = 0x0203040506.<a href="#section-3-2.9" class="pilcrow">¶</a>
 </li>
       </ul>
 </section>
@@ -1435,9 +1448,12 @@ Steps:
 key. It outputs the blinded message to be sent to the server, encoded as a byte string,
 and the corresponding inverse, an integer. RSAVP1 and EMSA-PSS-ENCODE are as defined in
 Sections <a href="https://rfc-editor.org/rfc/rfc8017#section-5.2.2" class="relref">5.2.2</a> and <a href="https://rfc-editor.org/rfc/rfc8017#section-9.1.1" class="relref">9.1.1</a> of <span>[<a href="#RFC8017" class="cite xref">RFC8017</a>]</span>, respectively.<a href="#section-4.2-1" class="pilcrow">¶</a></p>
-<p id="section-4.2-2">If this function fails with an "invalid blind" error, implementations SHOULD retry
+<p id="section-4.2-2">If this function fails with an "blinding error" error, implementations SHOULD retry
 the function again. The probability of one or more such errors in sequence is negligible.
-See <a href="#errors" class="auto internal xref">Section 6.1</a> for more information about dealing with such errors.<a href="#section-4.2-2" class="pilcrow">¶</a></p>
+This function can also fail with an "invalid input" error, which indicates that one of
+the inputs (likely the public key) was invalid. Implementations SHOULD update the public
+key before calling this function again. See <a href="#errors" class="auto internal xref">Section 6.1</a> for more information about
+dealing with such errors.<a href="#section-4.2-2" class="pilcrow">¶</a></p>
 <p id="section-4.2-3">Note that this function invokes RSAVP1, which is defined to throw an optional error
 for invalid inputs. However, this error cannot occur based on how RSAVP1 is invoked,
 so this error is not included in the list of errors for Blind.<a href="#section-4.2-3" class="pilcrow">¶</a></p>
@@ -1462,21 +1478,25 @@ Outputs:
 Errors:
 - "message too long": Raised when the input message is too long (raised by EMSA-PSS-ENCODE).
 - "encoding error": Raised when the input message fails encoding (raised by EMSA-PSS-ENCODE).
-- "invalid blind": Raised when the inverse of r cannot be found.
+- "blinding error": Raised when the inverse of r cannot be found.
+- "invalid input": Raised when the message is not co-prime with n.
 
 Steps:
 1. encoded_msg = EMSA-PSS-ENCODE(msg, bit_len(n))
    with Hash, MGF, and sLen as defined in the parameters
 2. If EMSA-PSS-ENCODE raises an error, raise the error and stop
 3. m = bytes_to_int(encoded_msg)
-4. r = random_integer_uniform(1, n)
-5. inv = inverse_mod(r, n)
-6. If inverse_mod fails, raise an "invalid blind" error
+4. c = is_coprime(m, n)
+5. If c is false, raise an "invalid input" error
    and stop
-7. x = RSAVP1(pkS, r)
-8. z = m * x mod n
-9. blinded_msg = int_to_bytes(z, kLen)
-10. output blinded_msg, inv
+6. r = random_integer_uniform(1, n)
+7. inv = inverse_mod(r, n)
+8. If inverse_mod fails, raise an "blinding error" error
+   and stop
+9. x = RSAVP1(pkS, r)
+10. z = m * x mod n
+11. blinded_msg = int_to_bytes(z, kLen)
+12. output blinded_msg, inv
 </pre><a href="#section-4.2-4" class="pilcrow">¶</a>
 </div>
 <p id="section-4.2-5">The blinding factor r MUST be randomly chosen from a uniform distribution.
@@ -1654,8 +1674,8 @@ These errors are meant as a guide for implementors. They are not an exhaustive l
 the errors an implementation might emit. For example, implementations might run out of memory.<a href="#section-6.1-1" class="pilcrow">¶</a></p>
 <p id="section-6.1-2">Moreover, implementations can handle errors as needed or desired. Where applicable, this document
 provides guidance for how to deal with explicit errors that are generated in the protocol. For
-example, the "invalid blind" error that is generated in Blind occurs when the client generates
-a prime factor of the server's public key. <a href="#blind" class="auto internal xref">Section 4.2</a> indicates that implementations SHOULD
+example, "blinding error" is generated in Blind when the client produces a prime factor of
+the server's public key. <a href="#blind" class="auto internal xref">Section 4.2</a> indicates that implementations SHOULD
 retry the Blind function when this error occurs, but an implementation could also handle this
 exceptional event differently, e.g., by informing the server that the key has been factored.<a href="#section-6.1-2" class="pilcrow">¶</a></p>
 </section>
@@ -1960,7 +1980,7 @@ is based on RSA. Shor's polynomial-time factorization algorithm readily applies.
 <dd class="break"></dd>
 <dt id="VOPRF">[VOPRF]</dt>
         <dd>
-<span class="refAuthor">Davidson, A.</span>, <span class="refAuthor">Faz-Hernandez, A.</span>, <span class="refAuthor">Sullivan, N.</span>, and <span class="refAuthor">C. A. Wood</span>, <span class="refTitle">"Oblivious Pseudorandom Functions (OPRFs) using Prime-Order Groups"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-irtf-cfrg-voprf-19</span>, <time datetime="2023-01-24" class="refDate">24 January 2023</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-voprf-19">https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-voprf-19</a>&gt;</span>. </dd>
+<span class="refAuthor">Davidson, A.</span>, <span class="refAuthor">Faz-Hernandez, A.</span>, <span class="refAuthor">Sullivan, N.</span>, and <span class="refAuthor">C. A. Wood</span>, <span class="refTitle">"Oblivious Pseudorandom Functions (OPRFs) using Prime-Order Groups"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-irtf-cfrg-voprf-21</span>, <time datetime="2023-02-21" class="refDate">21 February 2023</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-voprf-21">https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-voprf-21</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="WM99">[WM99]</dt>
       <dd>
